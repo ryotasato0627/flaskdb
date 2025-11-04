@@ -1,0 +1,30 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# ---- Virtual environment ----
+.venv/
+env/
+venv/
+
+# ---- Database ----
+*.db
+*.sqlite3
+
+# ---- Environment / Config ----
+.env
+*.env
+
+# ---- OS / Editor ----
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# ---- Logs / Temp ----
+*.log
+*.tmp
+*.bak
