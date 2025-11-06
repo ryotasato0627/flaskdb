@@ -11,6 +11,9 @@ def signin():
     data = request.get_json()
     if not data or "username" not in data or "email" not in data or "password" not in data:
         return erorr_resoponse("username、emailとpasswordは必須です", status=400)
+    exisitng_user = User.query.filter_by(username=data["username"]).first()
+    if exisitng_user:
+        return erorr_resoponse("すでに登録されているユーザー名です", 409)
     hashed_password = generate_password_hash(data["password"])
     new_user = User(username=data["username"], email=data["email"], password=hashed_password)
     db.session.add(new_user)
@@ -20,12 +23,12 @@ def signin():
 @user_bp.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
-    if not data or "email" in data or "password" in data:
+    if not data or "email" not in data or "password" not in data:
         return erorr_resoponse("emailとpasswordは必須です", status=400)
-    user = user.query.filter_by(email=data["email"]).first()
+    user = User.query.filter_by(email=data["email"]).first()
     if not user:
         return erorr_resoponse("emailが登録されていません", status=404)
-    if not check_password_hash(user.password_hash, data["password"]):
+    if not check_password_hash(user.password, data["password"]):
         return erorr_resoponse("パスワードが違います", status=401)
     session['user_id'] = user.id
     session['user_email'] = user.email
@@ -40,6 +43,6 @@ def logout():
 
 @user_bp.route("/check", methods=['GET'])
 def check():
-    if 'use_id' in session:
+    if 'user_id' in session:
         return success_response("ログインしています", status=200)
     return erorr_resoponse("ログインしていません", status=401)

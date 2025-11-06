@@ -7,7 +7,7 @@ def success_response(data=None, message="成功しました", status=200):
     }
     if data is not None:
         response["data"] = data
-    return jsonify(res), status
+    return jsonify(response), status
 
 def erorr_resoponse(message="エラーが発生しました", erorr=None, status=500):
     response = {

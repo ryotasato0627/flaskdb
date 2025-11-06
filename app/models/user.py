@@ -7,8 +7,7 @@ class User(db.Model):
     username = db.Column(db.String(100), unique=True, nullable=False)
     email = db.Column(db.String(120), nullable=False)
     password = db.Column(db.String(200), nullable=False)
-    created_at = db.Column(db.DateTime, default=lambda: datetime.now(ZoneInfo("Asia/Tokyo")))
-    update_at = db.Column(db.DateTime, default=lambda: datetime.now(ZoneInfo("Asia/Tokyo"), onupdate=lambda: datetime.now(ZoneInfo("Asia/Tokyo"))))
+    created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Asia/Tokyo")))
 
     def to_dict(self, inclube_password=False):
         data =  {
