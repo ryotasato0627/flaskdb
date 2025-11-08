@@ -8,28 +8,35 @@ user_bp = Blueprint('user', __name__, url_prefix='/user')
 
 @user_bp.route("/signin", methods=["POST"])
 def signin():
-    data = request.get_json()
-    if not data or "username" not in data or "email" not in data or "password" not in data:
-        return erorr_resoponse("username、emailとpasswordは必須です", status=400)
-    exisitng_user = User.query.filter_by(username=data["username"]).first()
-    if exisitng_user:
-        return erorr_resoponse("すでに登録されているユーザー名です", 409)
-    hashed_password = generate_password_hash(data["password"])
-    new_user = User(username=data["username"], email=data["email"], password=hashed_password)
-    db.session.add(new_user)
-    db.session.commit()
-    return success_response("user登録しました")
+    try:
+        data = request.get_json()
+        if not data or "username" not in data or "email" not in data or "password" not in data:
+            return erorr_resoponse("username、emailとpasswordは必須です", status=400)
+        exisitng_user = User.query.filter_by(username=data["username"]).first()
+        if exisitng_user:
+            return erorr_resoponse("すでに登録されているユーザー名です", 409)
+        hashed_password = generate_password_hash(data["password"])
+        new_user = User(username=data["username"], email=data["email"], password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return success_response("user登録しました")
+    except Exception as e:
+        erorr_resoponse("サインインに失敗しました", e)
 
 @user_bp.route("/login", methods=['POST'])
 def login():
-    data = request.get_json()
-    if not data or "email" not in data or "password" not in data:
-        return erorr_resoponse("emailとpasswordは必須です", status=400)
-    user = User.query.filter_by(email=data["email"]).first()
-    if not user:
-        return erorr_resoponse("emailが登録されていません", status=404)
-    if not check_password_hash(user.password, data["password"]):
-        return erorr_resoponse("パスワードが違います", status=401)
+    try:
+        data = request.get_json()
+        if not data or "email" not in data or "password" not in data:
+            return erorr_resoponse("emailとpasswordは必須です", status=400)
+        user = User.query.filter_by(email=data["email"]).first()
+        if not user:
+            return erorr_resoponse("emailが登録されていません", status=404)
+        if not check_password_hash(user.password, data["password"]):
+            return erorr_resoponse("パスワードが違います", status=401)
+    except Exception as e:
+        erorr_resoponse("ログインに失敗しました", e)
+
     session['user_id'] = user.id
     session['user_email'] = user.email
     session["username"] = user.username
@@ -38,11 +45,17 @@ def login():
 
 @user_bp.route("/logout", methods=['POST'])
 def logout():
-    session.clear()
-    return success_response("ログアウトしました", status=200)
+    try:
+        session.clear()
+        return success_response("ログアウトしました", status=200)
+    except Exception as e:
+        erorr_resoponse("ログアウトに失敗しました", e)
 
 @user_bp.route("/check", methods=['GET'])
 def check():
-    if 'user_id' in session:
-        return success_response("ログインしています", status=200)
-    return erorr_resoponse("ログインしていません", status=401)
+    try:
+        if 'user_id' in session:
+            return success_response("ログインしています", status=200)
+        return erorr_resoponse("ログインしていません", status=401)
+    except Exception as e:
+        erorr_resoponse("セッション情報の取得に失敗しました", e)
