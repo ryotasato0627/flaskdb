@@ -21,7 +21,7 @@ def signin():
         db.session.commit()
         return success_response("user登録しました")
     except Exception as e:
-        erorr_resoponse("サインインに失敗しました", e)
+        return erorr_resoponse("サインインに失敗しました", e)
 
 @user_bp.route("/login", methods=['POST'])
 def login():
@@ -35,7 +35,7 @@ def login():
         if not check_password_hash(user.password, data["password"]):
             return erorr_resoponse("パスワードが違います", status=401)
     except Exception as e:
-        erorr_resoponse("ログインに失敗しました", e)
+        return erorr_resoponse("ログインに失敗しました", e)
 
     session['user_id'] = user.id
     session['user_email'] = user.email
@@ -49,7 +49,7 @@ def logout():
         session.clear()
         return success_response("ログアウトしました", status=200)
     except Exception as e:
-        erorr_resoponse("ログアウトに失敗しました", e)
+        return erorr_resoponse("ログアウトに失敗しました", e)
 
 @user_bp.route("/check", methods=['GET'])
 def check():
@@ -58,4 +58,4 @@ def check():
             return success_response("ログインしています", status=200)
         return erorr_resoponse("ログインしていません", status=401)
     except Exception as e:
-        erorr_resoponse("セッション情報の取得に失敗しました", e)
+        return erorr_resoponse("セッション情報の取得に失敗しました", e)
