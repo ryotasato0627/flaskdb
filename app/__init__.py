@@ -3,6 +3,9 @@ from app.database import db
 from app.models.note import Note
 from app.models.user import User
 from .config import Config
+from utils.response import error_resoponse
+from utils.logger import logger
+import traceback
 
 def create_app():
     app = Flask(__name__)
@@ -17,5 +20,16 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(user_bp)
 
+
+    from .routes.user import user_bp
+    app.register_blueprint(user_bp)
+
+    @app.erorrhandler(Exception)
+    def handle_exception(e):
+        db.session.rollback()
+
+        erorr_trace = traceback.format_exc()
+        logger.error(f"例外発生: {e}\n{erorr_trace}")
+        return error_resoponse("サーバー側でエラーが発生しました", e)
 
     return app

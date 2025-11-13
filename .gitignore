@@ -25,6 +25,7 @@ Thumbs.db
 .vscode/
 
 # ---- Logs / Temp ----
+logs/
 *.log
 *.tmp
 *.bak
