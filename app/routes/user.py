@@ -4,7 +4,7 @@ from ..models.user import User
 from app.database import db
 from app.utils.response import success_response, error_resoponse
 
-user_bp = Blueprint('user', __name__, url_prefix='/user')
+user_bp = Blueprint('user', __name__, url_prefix="/user")
 
 @user_bp.route("/signin", methods=["POST"])
 def signin():
@@ -20,17 +20,16 @@ def signin():
 @user_bp.route("/login", methods=['POST'])
 def login():
     data = request.get_json()
-    if not data or "email" in data or "password" in data:
+    if not data or "email" not in data or "password" not in data:
         return error_resoponse("emailとpasswordは必須です", status=400)
-    user = user.query.filter_by(email=data["email"]).first()
+    user = User.query.filter_by(email=data["email"]).first()
     if not user:
         return error_resoponse("emailが登録されていません", status=404)
-    if not check_password_hash(user.password_hash, data["password"]):
+    if not check_password_hash(user.password, data["password"]):
         return error_resoponse("パスワードが違います", status=401)
     session['user_id'] = user.id
     session['user_email'] = user.email
     session["username"] = user.username
-
     return success_response("ログインしました", status=200)
 
 @user_bp.route("/logout", methods=['POST'])

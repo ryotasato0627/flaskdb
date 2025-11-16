@@ -17,8 +17,8 @@ def create_app():
 
     from .routes.note import main_bp
     from .routes.user import user_bp
-    app.register_blueprint(main_bp, url_prefix="/notes")
-    app.register_blueprint(user_bp, url_prefix="/users")
+    app.register_blueprint(main_bp)
+    app.register_blueprint(user_bp)
 
     @app.errorhandler(Exception)
     def handle_exception(e):
