@@ -8,6 +8,7 @@ class User(db.Model):
     email = db.Column(db.String(120), nullable=False)
     password = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Asia/Tokyo")))
+    notes = db.relationship('Note', backref='user', lazy=True)
 
     def to_dict(self, inclube_password=False):
         data =  {

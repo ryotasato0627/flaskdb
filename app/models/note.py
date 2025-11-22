@@ -7,10 +7,12 @@ class Note(db.Model):
     title = db.Column(db.String(100), nullable=False)
     content = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now(ZoneInfo("Asia/Tokyo")))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def to_dict(self):
         return {
             "id" : self.id,
+            "user_id" : self.user_id,
             "title" : self.title,
             "content" : self.content,
             "created_at" : self.created_at
