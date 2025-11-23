@@ -9,7 +9,7 @@ def success_response(data=None, message="成功しました", status=200):
         response["data"] = data
     return jsonify(response), status
 
-def error_resoponse(message="エラーが発生しました", erorr=None, status=500):
+def error_response(message="エラーが発生しました", erorr=None, status=500):
     response = {
         "success" : False,
         "message" : message,

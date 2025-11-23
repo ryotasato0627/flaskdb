@@ -3,9 +3,10 @@ from app.database import db
 from app.models.note import Note
 from app.models.user import User
 from .config import Config
-from .utils.response import error_resoponse
+from .utils.response import error_response
 from .utils.logger import logger
 import traceback
+import jwt
 
 def create_app():
     app = Flask(__name__)
@@ -25,6 +26,6 @@ def create_app():
         db.session.rollback()
         error_trace = traceback.format_exc()
         logger.error(f"例外発生: {e}\n{error_trace}")
-        return error_resoponse("サーバー側でエラーが発生しました", e)
+        return error_response("サーバー側でエラーが発生しました", 500)
 
     return app
