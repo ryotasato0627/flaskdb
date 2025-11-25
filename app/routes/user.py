@@ -17,7 +17,7 @@ def signup():
     if User.query.filter_by(email=data["email"]):
         return error_response("登録済みのemailです")
     if not data or "username" not in data or "email" not in data or "password" not in data:
-        return error_response("username、emailとpasswordは必須です", status=400)
+        return error_response("username、emailとpasswordは必須です", 400)
     hashed_password = generate_password_hash(data["password"])
     new_user = User(username=data["username"], email=data["email"], password=hashed_password)
     db.session.add(new_user)
@@ -31,7 +31,7 @@ def login():
         return error_response("emailとpasswordは必須です", 400)
     user = User.query.filter_by(email=data["email"]).first()
     if not user:
-        return error_response("emailが登録されていません", status=404)
+        return error_response("emailが登録されていません", 404)
     if not check_password_hash(user.password, data["password"]):
         return error_response("パスワードが違います", 401)
     payload = {
