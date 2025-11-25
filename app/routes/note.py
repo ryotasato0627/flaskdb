@@ -1,27 +1,52 @@
 from flask import Blueprint, session, request
+import jwt
+from functools import wraps
 from ..models.note import Note
 from ..models.user import User
 from app.database import db
 from app.utils.response import success_response, error_response
 from app.utils.logger import logger
+from ..config import Config
 
 main_bp = Blueprint("main", __name__)
 
+def token_required(f):
+    @wraps(f)
+    def decorated(*arg, **kwargs):
+        token = None
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("bearer"):
+            token = auth_header.split(" ")[1]
+
+        if not token:
+            return error_response("トークンが必要です", 401)
+        
+        try:
+            payload = jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
+            user_id = payload["user_id"]
+        except jwt.ExpiredSignatureError:
+            return error_response("トークンの有効期限が切れています", 401)
+        except jwt.InvalidTokenError:
+            return error_response("不正なトークンです", 401)
+        
+        return f(user_id, *arg, ** kwargs)
+    return decorated
+
 @main_bp.route("/", methods=["GET"])
+@token_required
 def root():
     return success_response(message="hello flask")
 
 @main_bp.route("/notes", methods=["GET"])
+@token_required
 def get_all_notes():
     notes = Note.query.all()
-    user_id = session.get("user_id")
-    if not user_id:
-        return error_response("ログインしてください", 401)
     data = [note.to_dict() for note in notes]
     logger.info("Note一覧取得リクエストを受け取りました")
     return success_response(data, "Note一覧を取得しました")
 
 @main_bp.route("/note/<int:id>", methods=["GET"])
+@token_required
 def note_get_by_id(id):
     note = Note.query.get_or_404(id)
     logger.info(f"{id}のNoteの取得リクエストを受け取りました")
@@ -29,11 +54,9 @@ def note_get_by_id(id):
 
 
 @main_bp.route("/note", methods=["POST"])
-def create_note():
+@token_required
+def create_note(user_id):
     data = request.get_json()
-    user_id = session.get("user_id")
-    if not user_id:
-        return error_response("ログインしてください", 401)
     if not data or "title" not in data or "content" not in data:
         return error_response("titleとcontentは必須です", 400)
     new_note = Note(title=data["title"], content=data["content"], user_id=user_id)
@@ -43,12 +66,12 @@ def create_note():
     return success_response("Noteを作成しました")
     
 @main_bp.route("/notes/<int:id>", methods=["PUT"])
-def update_note(id):
+@token_required
+def update_note(user_id, id):
     note = Note.query.get_or_404(id)
+    if note.user_id != user_id:
+        error_response("編集できるのは自分が作成したNoteのみです", 403)
     data = request.get_json()
-    user_id = session.get("user_id")
-    if not user_id:
-        return error_response("ログインしてください", 401)
     if not data or not "title" in data or not "content" in data:
         return error_response("titleとcontentは必須です", 400)
     note.title = data.get("title", note.title)
@@ -58,11 +81,11 @@ def update_note(id):
     return success_response(note.to_dict(), "Noteを更新しました")
 
 @main_bp.route("/notes/<int:id>", methods=["DELETE"])
-def delete_note(id):
+@token_required
+def delete_note(user_id, id):
     note = Note.query.get_or_404(id)
-    user_id = session.get("user_id")
-    if not user_id:
-        error_response("ログインしてください", 401)
+    if note.user_id != user_id:
+        error_response("編集できるのは自分が作成したNoteのみです", 403)
     db.session.delete(note)
     db.session.commit()
     logger.info(f"{id}のNoteを削除しました")
