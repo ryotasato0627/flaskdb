@@ -6,31 +6,10 @@ from ..models.user import User
 from app.database import db
 from app.utils.response import success_response, error_response
 from app.utils.logger import logger
+from ..utils.token import token_required
 from ..config import Config
 
 main_bp = Blueprint("main", __name__)
-
-def token_required(f):
-    @wraps(f)
-    def decorated(*arg, **kwargs):
-        token = None
-        auth_header = request.headers.get("Authorization")
-        if auth_header and auth_header.startswith("bearer"):
-            token = auth_header.split(" ")[1]
-
-        if not token:
-            return error_response("トークンが必要です", 401)
-        
-        try:
-            payload = jwt.decode(token, Config.SECRET_KEY, algorithms=["HS256"])
-            user_id = payload["user_id"]
-        except jwt.ExpiredSignatureError:
-            return error_response("トークンの有効期限が切れています", 401)
-        except jwt.InvalidTokenError:
-            return error_response("不正なトークンです", 401)
-        
-        return f(user_id, *arg, ** kwargs)
-    return decorated
 
 @main_bp.route("/", methods=["GET"])
 @token_required
