@@ -1,5 +1,5 @@
 from functools import wraps
-from functools import requests
+from flask import request
 import jwt
 from ..config import Config
 from ..utils.response import error_response
@@ -9,7 +9,7 @@ def token_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         token = None
-        auth_header =requests.headers.get("Authorization")
+        auth_header =request.headers.get("Authorization")
 
         if auth_header and auth_header.lower().startswith("bearer "):
             token = auth_header.split(" ")[1]

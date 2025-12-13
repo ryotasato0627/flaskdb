@@ -1,6 +1,6 @@
 from flask import Flask
 from ..models.note import Note
-from .database import db
+from ..database import db
 from ..utils.response import error_response, success_response
 from ..utils.logger import logger
 from ..config import Config
@@ -16,7 +16,9 @@ class NoteService:
     
     @staticmethod
     def get_note_by_id(note_id):
-        note = Note.query.get_or_404(note_id)
+        note = Note.query.get(note_id)
+        if not note:
+            raise ValueError("Noteが存在しません")
         logger.info(f"Note ID {note_id} を取得しました")
         return note
     
@@ -32,7 +34,7 @@ class NoteService:
     
     @staticmethod
     def update_note(note_id, user_id, title, content):
-        update_note = Note.query.get_or_404(note_id)
+        update_note = Note.query.get(note_id)
         if update_note.user_id != user_id:
             raise ValueError("編集できるのは自分が作成したNoteのみです")
         if not title or not content:
@@ -45,7 +47,7 @@ class NoteService:
     
     @staticmethod
     def delete_note(note_id, user_id):
-        delete_note = Note.query.get_or_404(note_id)
+        delete_note = Note.query.get(note_id)
         if delete_note.user_id != user_id:
             raise ValueError("削除できるのは自分が作成したNoteのみです")
         db.session.delete(delete_note)

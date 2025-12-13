@@ -1,12 +1,8 @@
-from flask import Blueprint, session, request
-import jwt
-from functools import wraps
-from ..models.note import Note
-from ..models.user import User
-from app.database import db
-from app.utils.response import success_response, error_response
-from app.utils.logger import logger
-from ..utils.token import token_required
+from flask import Blueprint, request
+from ..services.note import NoteService
+from ..utils.response import success_response, error_response
+from ..utils.logger import logger
+from ..utils.token_required import token_required
 from ..config import Config
 
 main_bp = Blueprint("main", __name__)
@@ -18,54 +14,48 @@ def root():
 
 @main_bp.route("/notes", methods=["GET"])
 @token_required
-def get_all_notes():
-    notes = Note.query.all()
-    data = [note.to_dict() for note in notes]
-    logger.info("Note一覧取得リクエストを受け取りました")
-    return success_response(data, "Note一覧を取得しました")
+def get_all_notes(user_id):
+    try:
+        notes = NoteService.get_all_notes()
+        return success_response([note.to_dict() for note in notes], "Note一覧を取得しました")
+    except ValueError as e:
+        return error_response(str(e), 404)
+
 
 @main_bp.route("/note/<int:id>", methods=["GET"])
 @token_required
-def note_get_by_id(id):
-    note = Note.query.get_or_404(id)
-    logger.info(f"{id}のNoteの取得リクエストを受け取りました")
-    return success_response(note.to_dict(), "Noteを取得しました")
-
+def note_get_by_id(user_id, id):
+    try:
+        note = NoteService.get_note_by_id(id)
+        return success_response(note.to_dict(), "Noteを取得しました")
+    except ValueError as e:
+        return error_response(str(e), 404)
 
 @main_bp.route("/note", methods=["POST"])
 @token_required
 def create_note(user_id):
-    data = request.get_json()
-    if not data or "title" not in data or "content" not in data:
-        return error_response("titleとcontentは必須です", 400)
-    new_note = Note(title=data["title"], content=data["content"], user_id=user_id)
-    db.session.add(new_note)
-    db.session.commit()
-    logger.info("Noteを作成しました")
-    return success_response("Noteを作成しました")
-    
-@main_bp.route("/notes/<int:id>", methods=["PUT"])
+    try:
+        data = request.get_json()
+        NoteService.create_note(user_id, data["title"], data["content"])
+        return success_response("Noteを作成しました")
+    except ValueError as e:
+        return error_response(str(e), 404)
+
+@main_bp.route("/note/<int:id>", methods=["PUT"])
 @token_required
 def update_note(user_id, id):
-    note = Note.query.get_or_404(id)
-    if note.user_id != user_id:
-        error_response("編集できるのは自分が作成したNoteのみです", 403)
-    data = request.get_json()
-    if not data or not "title" in data or not "content" in data:
-        return error_response("titleとcontentは必須です", 400)
-    note.title = data.get("title", note.title)
-    note.content = data.get("content", note.content)
-    db.session.commit()
-    logger.info(f"{id}のNoteを更新しました")
-    return success_response(note.to_dict(), "Noteを更新しました")
+    try:
+        data = request.get_json()
+        note = NoteService.update_note(id,user_id, data["title"], data["content"])
+        return success_response(note.to_dict(), "Noteを更新しました")
+    except ValueError as e:
+        return error_response(str(e), 404)
 
-@main_bp.route("/notes/<int:id>", methods=["DELETE"])
+@main_bp.route("/note/<int:id>", methods=["DELETE"])
 @token_required
 def delete_note(user_id, id):
-    note = Note.query.get_or_404(id)
-    if note.user_id != user_id:
-        error_response("編集できるのは自分が作成したNoteのみです", 403)
-    db.session.delete(note)
-    db.session.commit()
-    logger.info(f"{id}のNoteを削除しました")
-    return success_response("Noteを削除しました")
+    try:
+        NoteService.delete_note(id, user_id)
+        return success_response("Noteを削除しました")
+    except ValueError as e:
+        return error_response(str(e), 404)

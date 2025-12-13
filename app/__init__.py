@@ -1,6 +1,6 @@
 from flask import Flask
 from app.database import db
-from app.extensions import ma
+#from app.extensions import ma
 from app.models.note import Note
 from app.models.user import User
 from .config import Config
@@ -17,12 +17,14 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-    ma.init_app(app)
+    #ma.init_app(app)
 
     from .routes.note import main_bp
     from .routes.user import user_bp
+    from .routes.auth import auth_bp
     app.register_blueprint(main_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(auth_bp)
 
     @app.errorhandler(Exception)
     def handle_exception(e):

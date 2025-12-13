@@ -1,11 +1,7 @@
 from flask import Blueprint, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
-from zoneinfo import ZoneInfo
 from ..models.user import User
-from ..services.auth import AuthService
 from app.database import db
-from app.utils.response import success_response, error_response
-from ..config import Config
 from ..utils.logger import logger
 
 class UserService:
