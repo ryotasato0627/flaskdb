@@ -1,11 +1,7 @@
 from flask import Flask
 from ..models.note import Note
 from ..database import db
-from ..utils.response import error_response, success_response
 from ..utils.logger import logger
-from ..config import Config
-from ..utils.token import TokenUtils
-from ..utils.token_required import token_required
 
 class NoteService:
     @staticmethod

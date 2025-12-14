@@ -1,9 +1,6 @@
 from flask import request
-import jwt
 from werkzeug.security import check_password_hash
-from zoneinfo import ZoneInfo
 from ..models.user import User
-from ..config import Config
 from ..utils.logger import logger
 from ..utils.token import TokenUtils
 
@@ -18,20 +15,3 @@ class AuthService:
         token = TokenUtils.generate_token(user.id)
         logger.info(f"{user.username}がログインしました")
         return {"access_token" : token}
-        
-    @staticmethod
-    def token_required(f):
-        @wraps(f)
-        def decorated(*arg, **kwargs):
-            token = None
-
-            auth_header = request.headers.get("Authorization")
-            if auth_header and auth_header.lower().startswith("Bearer "):
-                token = auth_header.split(" ")[1]
-
-            if not token:
-                raise ValueError("トークンが必要です")
-            
-        payload = TokenUtils.verify_token(token)
-
-        

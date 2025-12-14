@@ -1,7 +1,8 @@
 from flask import Blueprint, request
+from pydantic import ValidationError
 from ..services.note import NoteService
+from ..schemas.note import NoteSchema, NoteResponseSchema
 from ..utils.response import success_response, error_response
-from ..utils.logger import logger
 from ..utils.token_required import token_required
 from ..config import Config
 
@@ -35,21 +36,27 @@ def note_get_by_id(user_id, id):
 @token_required
 def create_note(user_id):
     try:
-        data = request.get_json()
-        NoteService.create_note(user_id, data["title"], data["content"])
-        return success_response("Noteを作成しました")
+        data = NoteSchema(**request.json)
+        new_note = NoteService.create_note(user_id, data.title, data.content)
+        response_schema = NoteResponseSchema.from_orm(new_note)
     except ValueError as e:
         return error_response(str(e), 404)
+    except ValidationError as e:
+        return error_response(str(e), 400)
+    return success_response(response_schema.dict(), "Noteを作成しました", 200)
 
 @main_bp.route("/note/<int:id>", methods=["PUT"])
 @token_required
 def update_note(user_id, id):
     try:
-        data = request.get_json()
-        note = NoteService.update_note(id,user_id, data["title"], data["content"])
-        return success_response(note.to_dict(), "Noteを更新しました")
+        data = NoteSchema(**request.json)
+        update_note = NoteService.update_note(id,user_id, data.title, data.content)
+        response_update_schema = NoteResponseSchema(**update_note)
     except ValueError as e:
         return error_response(str(e), 404)
+    except ValidationError as e:
+        return error_response(str(e), 400)
+    return success_response(response_update_schema.dict(), "Noteを更新しました", 200)
 
 @main_bp.route("/note/<int:id>", methods=["DELETE"])
 @token_required
