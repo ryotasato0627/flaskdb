@@ -1,17 +1,20 @@
 from flask import Blueprint, request, session
 from werkzeug.security import check_password_hash, generate_password_hash
 from ..models.user import User
-from app.database import db
+from ..database import db
+from ..repository.user import UserRepository
 from ..utils.logger import logger
 
+
 class UserService:
-    @staticmethod
-    def register(username, email, password):
-        if User.query.filter_by(email=email).first():
+    def __init__(self):
+        self.user_repo = UserRepository()
+
+    def register(self, username, email, password):
+        if self.user_repo.get_user_by_mail(email=email):
             raise ValueError("このメールアドレスは登録されています")
         hashed = generate_password_hash(password)
-        user = User(username=username, email=email, password=hashed)
-        db.session.add(user)
+        user = self.user_repo.create_user(username=username, email=email, password=hashed)
         db.session.commit()
         logger.info(f"{username}の登録が完了しました")
         return user

@@ -1,52 +1,50 @@
 from flask import Flask
 from ..models.note import Note
 from ..database import db
+from ..repository.note import NoteRepository
 from ..utils.logger import logger
 
+
 class NoteService:
-    @staticmethod
-    def get_all_notes():
-        notes = Note.query.all()
+    def __init__(self):
+        self.note_repo = NoteRepository()
+
+    def get_all_notes(self):
+        notes = self.note_repo.get_all_notes()
         logger.info("全てのNoteを取得しました")
         return notes
     
-    @staticmethod
-    def get_note_by_id(note_id):
-        note = Note.query.get(note_id)
-        if not note:
-            raise ValueError("Noteが存在しません")
+    def get_note_by_id(self, note_id):
+        note = self.note_repo.get_note_by_id(note_id)
         logger.info(f"Note ID {note_id} を取得しました")
         return note
     
-    @staticmethod
-    def create_note(user_id, title, content):
+    def create_note(self, user_id, title, content):
         if not title or not content:
             raise ValueError("titleとcontentは必須です")
-        new_note = Note(title=title, content=content, user_id=user_id)
-        db.session.add(new_note)
+        new_note = self.note_repo.create_note(title, content, user_id)
         db.session.commit()
         logger.info(f"新しいNoteを作成しました: {title}")
         return new_note
     
-    @staticmethod
-    def update_note(note_id, user_id, title, content):
-        update_note = Note.query.get(note_id)
-        if update_note.user_id != user_id:
-            raise ValueError("編集できるのは自分が作成したNoteのみです")
+    def update_note(self, user_id, note_id, title, content):
         if not title or not content:
             raise ValueError("titleとcontentは必須です")
-        update_note.title = title
-        update_note.content = content
+        update_note = self.note_repo.get_note_by_id(note_id)
+        NoteService.check_permission(update_note, user_id)
+        update_note = self.note_repo.update_note(note_id, title, content)
         db.session.commit()
         logger.info(f"Note ID {note_id} を更新しました")
         return update_note
     
-    @staticmethod
-    def delete_note(note_id, user_id):
-        delete_note = Note.query.get(note_id)
-        if delete_note.user_id != user_id:
-            raise ValueError("削除できるのは自分が作成したNoteのみです")
-        db.session.delete(delete_note)
+    def delete_note(self, note_id, user_id):
+        NoteService.check_permission(self.note_repo.get_note_by_id(note_id), user_id)
+        self.note_repo.delete_note(note_id, user_id)
         db.session.commit()
         logger.info(f"Note ID {note_id} を削除しました")
         return True
+    
+    @staticmethod
+    def check_permission(note, user_id):
+        if note.user_id != user_id:
+            raise PermissionError("権限がありません")
