@@ -1,7 +1,7 @@
 from flask import Blueprint, request
 from pydantic import ValidationError
 from ..services.note import NoteService
-from ..schemas.note import NoteSchema, NoteResponseSchema
+from ..schemas.note import NoteCreateSchema, NoteUpdateSchema, NoteResponseSchema
 from ..utils.response import success_response, error_response
 from ..utils.token_required import token_required
 from ..config import Config
@@ -36,7 +36,7 @@ def note_get_by_id(user_id, id):
 @token_required
 def create_note(user_id):
     try:
-        data = NoteSchema(**request.json)
+        data = NoteCreateSchema(**request.json)
         new_note = NoteService.create_note(user_id, data.title, data.content)
         response_schema = NoteResponseSchema.from_orm(new_note)
     except ValueError as e:
@@ -49,7 +49,7 @@ def create_note(user_id):
 @token_required
 def update_note(user_id, id):
     try:
-        data = NoteSchema(**request.json)
+        data = NoteUpdateSchema(**request.json)
         update_note = NoteService.update_note(id,user_id, data.title, data.content)
         response_update_schema = NoteResponseSchema(**update_note)
     except ValueError as e:
