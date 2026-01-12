@@ -15,6 +15,7 @@ class NoteRepository:
     def create_note(self, title, content, user_id):
         new_note = Note(title=title, content=content, user_id=user_id)
         db.session.add(new_note)
+        db.session.commit()
         return new_note
     
     def update_note(self, note_id, title, content):

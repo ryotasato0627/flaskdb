@@ -6,8 +6,8 @@ from ..utils.logger import logger
 
 
 class NoteService:
-    def __init__(self):
-        self.note_repo = NoteRepository()
+    def __init__(self, note_repo):
+        self.note_repo = note_repo
 
     def get_all_notes(self):
         notes = self.note_repo.get_all_notes()
@@ -23,7 +23,6 @@ class NoteService:
         if not title or not content:
             raise ValueError("titleとcontentは必須です")
         new_note = self.note_repo.create_note(title, content, user_id)
-        db.session.commit()
         logger.info(f"新しいNoteを作成しました: {title}")
         return new_note
     
