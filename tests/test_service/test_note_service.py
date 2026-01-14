@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import MagicMock
+from unittest.mock import Mock, MagicMock
 from app.services.note import NoteService
 from app.models.note import Note
 

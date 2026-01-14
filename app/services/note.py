@@ -1,4 +1,3 @@
-from flask import Flask
 from ..models.note import Note
 from ..database import db
 from ..repository.note import NoteRepository
