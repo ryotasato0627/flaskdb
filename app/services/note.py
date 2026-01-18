@@ -28,17 +28,15 @@ class NoteService:
     def update_note(self, user_id, note_id, title, content):
         if not title or not content:
             raise ValueError("titleとcontentは必須です")
-        update_note = self.note_repo.get_note_by_id(note_id)
-        NoteService.check_permission(update_note, user_id)
-        update_note = self.note_repo.update_note(note_id, title, content)
-        db.session.commit()
+        existing_note = self.note_repo.get_note_by_id(note_id)
+        self.check_permission(existing_note, user_id)
+        updated_note = self.note_repo.update_note(note_id, title, content)
         logger.info(f"Note ID {note_id} を更新しました")
-        return update_note
+        return updated_note
     
     def delete_note(self, note_id, user_id):
         NoteService.check_permission(self.note_repo.get_note_by_id(note_id), user_id)
         self.note_repo.delete_note(note_id, user_id)
-        db.session.commit()
         logger.info(f"Note ID {note_id} を削除しました")
         return True
     

@@ -22,6 +22,7 @@ class NoteRepository:
         update_note = self.get_note_by_id(note_id)
         update_note.title = title
         update_note.content = content
+        db.session.commit()
         return update_note
     
     def delete_note(self, note_id):
