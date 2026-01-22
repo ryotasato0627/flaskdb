@@ -6,7 +6,7 @@ from ..utils.logger import logger
 
 class NoteService:
     def __init__(self, note_repo: NoteRepository):
-        self.note_repo = note_repo
+        self.note_repo = note_repo or NoteRepository()
 
     def get_all_notes(self):
         notes = self.note_repo.get_all_notes()

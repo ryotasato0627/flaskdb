@@ -1,13 +1,13 @@
 from flask import request
 from werkzeug.security import check_password_hash
-from ..models.user import User
+from ..repository.user import UserRepository
 from ..utils.logger import logger
 from ..utils.token import TokenUtils
 
 class AuthService:
     @staticmethod
     def login(email, password):
-        user = User.query.filter_by(email=email).first()
+        user = UserRepository().get_user_by_mail(email=email)
         if not user:
             raise ValueError("ユーザーが登録されていません")
         if not check_password_hash(user.password, password):

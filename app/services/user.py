@@ -7,14 +7,13 @@ from ..utils.logger import logger
 
 
 class UserService:
-    def __init__(self):
-        self.user_repo = UserRepository()
+    def __init__(self, user_repo: UserRepository ):
+        self.user_repo = user_repo or UserRepository()
 
     def register(self, username, email, password):
         if self.user_repo.get_user_by_mail(email=email):
             raise ValueError("このメールアドレスは登録されています")
         hashed = generate_password_hash(password)
         user = self.user_repo.create_user(username=username, email=email, password=hashed)
-        db.session.commit()
         logger.info(f"{username}の登録が完了しました")
         return user
