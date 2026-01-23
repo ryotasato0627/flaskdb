@@ -1,17 +1,13 @@
 from flask import Flask
 from app.database import db
-#from app.extensions import ma
-from app.models.note import Note
-from app.models.user import User
 from .config import Config
 from .utils.response import error_response
 from .utils.logger import logger
 import traceback
-import jwt
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    app.config.from_object(Config, False)
 
     db.init_app(app)
     with app.app_context():
