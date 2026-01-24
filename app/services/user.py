@@ -15,6 +15,5 @@ class UserService:
             raise ValueError("このメールアドレスは登録されています")
         hashed = generate_password_hash(password)
         user = self.user_repo.register(username=username, email=email, password=hashed)
-        db.session.commit()
         logger.info(f"{username}の登録が完了しました")
         return user
