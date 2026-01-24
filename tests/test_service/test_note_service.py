@@ -11,7 +11,7 @@ class TestNoteService:
     @pytest.fixture
     def note_service(self, mock_note_repo):
         return NoteService(note_repo=mock_note_repo)
-
+    
     @pytest.fixture
     def sample_note(self):
         return DummyNote()
