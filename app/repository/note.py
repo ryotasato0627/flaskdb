@@ -41,7 +41,7 @@ class NoteRepository:
             db.session.rollback()
             raise
 
-    def delete_note(self, note_id):
+    def delete_note(self, note_id, user_id):
         try:
             delete_note = self.get_note_by_id(note_id)
             db.session.delete(delete_note)
