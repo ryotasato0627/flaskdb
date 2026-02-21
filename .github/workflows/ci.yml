@@ -33,6 +33,7 @@ jobs:
 
       - name: Run tests
         env:
+          DATABASE_URL: sqlite:///memory
           SECRET_KEY: ci-secret-key-for-testing
           ACCESS_TOKEN_EXPIRE_MINUTES: 15
         run: |
