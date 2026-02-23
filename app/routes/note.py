@@ -17,7 +17,7 @@ def root():
 @token_required
 def get_all_notes(user_id):
     try:
-        notes = NoteService.get_all_notes()
+        notes = NoteService.get_all_notes(user_id)
         return success_response([note.to_dict() for note in notes], "Note一覧を取得しました")
     except ValueError as e:
         return error_response(str(e), 404)

@@ -8,9 +8,9 @@ class NoteService:
     def __init__(self, note_repo: NoteRepository):
         self.note_repo = note_repo or NoteRepository()
 
-    def get_all_notes(self):
-        notes = self.note_repo.get_all_notes()
-        logger.info("全てのNoteを取得しました")
+    def get_all_notes(self, user_id):
+        notes = self.note_repo.get_all_notes(user_id)
+        logger.info("ユーザーに紐づくNote一覧を取得しました")
         return notes
     
     def get_note_by_id(self, note_id):

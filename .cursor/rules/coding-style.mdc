@@ -1,0 +1,9 @@
+# Coding Style Rules
+
+## 技術スタック
+- Python 3.12 / Flask 3.0.3 / PostgreSQL / SQLAlchemy / JWT
+
+## 方針
+- Flaskに依存した書き方をService層に持ち込まない
+- 認証はJWTによるアクセストークンまで。個人利用前提のため認可は最小限
+- セキュリティ・パフォーマンス最適化は学習範囲外のため最低限でよい
