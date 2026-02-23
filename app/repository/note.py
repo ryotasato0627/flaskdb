@@ -3,9 +3,9 @@ from ..database import db
 from ..models.note import Note
 
 class NoteRepository:
-    def get_all_notes(self):
+    def get_all_notes(self, user_id):
         try:
-            return Note.query.all()
+            return Note.query.filter_by(user_id=user_id).all()
         except Exception as e:
             db.session.rollback()
             raise

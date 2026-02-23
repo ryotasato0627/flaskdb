@@ -19,15 +19,16 @@ class TestNoteService:
     class TestGetAllNotes:
         def test_get_all_notes_success(self, note_service, mock_note_repo):
             # Arrange
-            expected_notes = [DummyNote(1, "タイトル1", "コンテンツ1", 100), DummyNote(2, "タイトル2", "コンテンツ2", 101)]
+            user_id = 100
+            expected_notes = [DummyNote(1, "タイトル1", "コンテンツ1", 100), DummyNote(2, "タイトル2", "コンテンツ2", 100)]
             mock_note_repo.get_all_notes.return_value = expected_notes
 
             # Act
-            result = note_service.get_all_notes()
+            result = note_service.get_all_notes(user_id)
 
             # Assert
             assert result == expected_notes
-            mock_note_repo.get_all_notes.assert_called_once()
+            mock_note_repo.get_all_notes.assert_called_once_with(user_id)
 
     class TestGetNoteById:
         def test_get_note_by_id_success(self, note_service, mock_note_repo, sample_note):
