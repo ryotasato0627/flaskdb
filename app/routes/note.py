@@ -17,8 +17,12 @@ def root():
 @token_required
 def get_all_notes(user_id):
     try:
-        notes = NoteService.get_all_notes(user_id)
-        return success_response([note.to_dict() for note in notes], "Note一覧を取得しました")
+        tag_id = request.args.get("tag_id", type=int)
+        notes = NoteService.get_all_notes(user_id, tag_id=tag_id)
+        return success_response(
+            [NoteResponseSchema.from_orm(n).dict() for n in notes],
+            "Note一覧を取得しました",
+        )
     except ValueError as e:
         return error_response(str(e), 404)
 
@@ -28,7 +32,9 @@ def get_all_notes(user_id):
 def note_get_by_id(user_id, id):
     try:
         note = NoteService.get_note_by_id(id)
-        return success_response(note.to_dict(), "Noteを取得しました")
+        return success_response(
+            NoteResponseSchema.from_orm(note).dict(), "Noteを取得しました"
+        )
     except ValueError as e:
         return error_response(str(e), 404)
 
@@ -37,7 +43,9 @@ def note_get_by_id(user_id, id):
 def create_note(user_id):
     try:
         data = NoteCreateSchema(**request.json)
-        new_note = NoteService.create_note(user_id, data.title, data.content)
+        new_note = NoteService.create_note(
+            user_id, data.title, data.content, tag_ids=data.tag_ids
+        )
         response_schema = NoteResponseSchema.from_orm(new_note)
     except ValueError as e:
         return error_response(str(e), 404)
@@ -50,8 +58,13 @@ def create_note(user_id):
 def update_note(user_id, id):
     try:
         data = NoteUpdateSchema(**request.json)
-        update_note = NoteService.update_note(id,user_id, data.title, data.content)
-        response_update_schema = NoteResponseSchema(**update_note)
+        updated = NoteService.update_note(
+            id, user_id,
+            title=data.title,
+            content=data.content,
+            tag_ids=data.tag_ids,
+        )
+        response_update_schema = NoteResponseSchema.from_orm(updated)
     except ValueError as e:
         return error_response(str(e), 404)
     except ValidationError as e:

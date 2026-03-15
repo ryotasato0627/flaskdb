@@ -28,7 +28,7 @@ class TestNoteService:
 
             # Assert
             assert result == expected_notes
-            mock_note_repo.get_all_notes.assert_called_once_with(user_id)
+            mock_note_repo.get_all_notes.assert_called_once_with(user_id, tag_id=None)
 
     class TestGetNoteById:
         def test_get_note_by_id_success(self, note_service, mock_note_repo, sample_note):
@@ -64,7 +64,9 @@ class TestNoteService:
 
             # Assert
             assert result == created_note
-            mock_note_repo.create_note.assert_called_once_with(title, content, user_id)
+            mock_note_repo.create_note.assert_called_once_with(
+                title, content, user_id, tag_ids=None
+            )
 
         @pytest.mark.parametrize(
             "title, content",
@@ -113,7 +115,9 @@ class TestNoteService:
 
             # Assert
             assert result == updated_note
-            mock_note_repo.update_note.assert_called_once_with(note_id, updated_title, updated_content)
+            mock_note_repo.update_note.assert_called_once_with(
+                note_id, updated_title, updated_content, tag_ids=None
+            )
 
         def test_update_note_permission_error(self, note_service, mock_note_repo):
             # Arrange
