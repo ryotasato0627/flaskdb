@@ -135,7 +135,7 @@ alwaysApply: true
 
 ---
 
-## 5. 参照ファイル（現状のモデル）
+バイオハザード レクイエム## 5. 参照ファイル（現状のモデル）
 
 - モデル定義: `app/models/user.py`, `app/models/note.py`
 - DB インスタンス: `app/database.py`
